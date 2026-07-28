@@ -2278,9 +2278,31 @@ static int map_files_get_link(struct dentry *dentry, struct path *path)
 	rc = -ENOENT;
 	vma = find_exact_vma(mm, vm_start, vm_end);
 	if (vma && vma->vm_file) {
+#ifdef CONFIG_PROC_MAPS_HIDE
+		const char *dname = vma->vm_file->f_path.dentry->d_name.name;
+		int i;
+		bool hide = false;
+		if (dname) {
+			for (i = 0; proc_maps_hide_patterns[i]; i++) {
+				if (strstr(dname, proc_maps_hide_patterns[i])) {
+					hide = true;
+					break;
+				}
+			}
+		}
+		if (hide && proc_maps_hide_redirect) {
+			rc = kern_path(proc_maps_hide_redirect,
+				       LOOKUP_FOLLOW, path);
+		} else {
+			*path = vma->vm_file->f_path;
+			path_get(path);
+			rc = 0;
+		}
+#else
 		*path = vma->vm_file->f_path;
 		path_get(path);
 		rc = 0;
+#endif
 	}
 	mmap_read_unlock(mm);
 

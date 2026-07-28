@@ -107,3 +107,18 @@ config PROC_PID_ARCH_STATUS
 config PROC_CPU_RESCTRL
 	def_bool n
 	depends on PROC_FS
+
+config PROC_MAPS_HIDE
+	bool "Hide sensitive ROM paths in /proc/<pid>/maps"
+	depends on PROC_FS
+	help
+	  When enabled, filters out configured path patterns from
+	  /proc/<pid>/maps and /proc/<pid>/map_files/ output.
+	  Matched paths are replaced with a generic benign path
+	  to prevent user-space apps from fingerprinting the ROM.
+
+	  The patterns and redirect target are configured via:
+	    CONFIG_PROC_MAPS_HIDE_PATTERNS
+	    CONFIG_PROC_MAPS_HIDE_REDIRECT
+
+	  If unsure, say N.
