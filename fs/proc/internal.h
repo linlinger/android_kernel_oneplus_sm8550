@@ -14,6 +14,11 @@
 #include <linux/sched/coredump.h>
 #include <linux/sched/task.h>
 
+#ifdef CONFIG_PROC_MAPS_HIDE
+extern const char *proc_maps_hide_patterns[];
+extern const char *proc_maps_hide_redirect;
+#endif
+
 struct ctl_table_header;
 struct mempolicy;
 

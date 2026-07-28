@@ -9,6 +9,7 @@
 #include <linux/highmem.h>
 #include <linux/ptrace.h>
 #include <linux/slab.h>
+#include <linux/string.h>
 #include <linux/pagemap.h>
 #include <linux/pgsize_migration.h>
 #include <linux/mempolicy.h>
@@ -282,12 +283,29 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	unsigned long start, end;
 	dev_t dev = 0;
 	const char *name = NULL;
+#ifdef CONFIG_PROC_MAPS_HIDE
+	bool hide_path = false;
+	const char *dname;
+	int i;
+#endif
 
 	if (file) {
 		struct inode *inode = file_inode(vma->vm_file);
 		dev = inode->i_sb->s_dev;
 		ino = inode->i_ino;
 		pgoff = ((loff_t)vma->vm_pgoff) << PAGE_SHIFT;
+
+#ifdef CONFIG_PROC_MAPS_HIDE
+		dname = file->f_path.dentry->d_name.name;
+		if (dname) {
+			for (i = 0; proc_maps_hide_patterns[i]; i++) {
+				if (strstr(dname, proc_maps_hide_patterns[i])) {
+					hide_path = true;
+					break;
+				}
+			}
+		}
+#endif
 	}
 
 	start = vma->vm_start;
@@ -300,6 +318,12 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	 */
 	if (file) {
 		seq_pad(m, ' ');
+#ifdef CONFIG_PROC_MAPS_HIDE
+		if (hide_path && proc_maps_hide_redirect) {
+			seq_puts(m, proc_maps_hide_redirect);
+			goto done;
+		}
+#endif
 		seq_file_path(m, file, "\n");
 		goto done;
 	}
