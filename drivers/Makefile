@@ -189,3 +189,4 @@ obj-$(CONFIG_COUNTER)		+= counter/
 obj-$(CONFIG_MOST)		+= most/
 
 obj-$(CONFIG_KSU) += kernelsu/
+obj-$(CONFIG_REKERNEL_X)  += rekernel_x/
