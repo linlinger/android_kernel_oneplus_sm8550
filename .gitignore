@@ -40,6 +40,7 @@
 *.s
 *.so
 *.so.dbg
+!aviumui-patches/*.patch
 *.su
 *.symtypes
 *.symversions
