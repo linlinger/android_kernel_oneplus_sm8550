@@ -28,6 +28,9 @@
 #include <net/ping.h>
 #include <net/protocol.h>
 #include <net/netevent.h>
+#ifndef __GENKSYMS__
+#include <net/netns/generic.h>
+#endif
 
 static int two = 2;
 static int three __maybe_unused = 3;
@@ -1449,6 +1452,12 @@ static __init int sysctl_ipv4_init(void)
 		return -ENOMEM;
 
 	if (register_pernet_subsys(&ipv4_sysctl_ops)) {
+		unregister_net_sysctl_table(hdr);
+		return -ENOMEM;
+	}
+
+	if (register_pernet_subsys(&plb_net_ops)) {
+		unregister_pernet_subsys(&ipv4_sysctl_ops);
 		unregister_net_sysctl_table(hdr);
 		return -ENOMEM;
 	}
