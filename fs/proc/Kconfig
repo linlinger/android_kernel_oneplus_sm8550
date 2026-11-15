@@ -122,3 +122,24 @@ config PROC_MAPS_HIDE
 	    CONFIG_PROC_MAPS_HIDE_REDIRECT
 
 	  If unsure, say N.
+
+# NOTE: these two must be declared as Kconfig symbols, otherwise
+# defconfig-fragment values are silently dropped by olddefconfig
+# (undeclared symbols never reach include/generated/autoconf.h,
+# and maps_hide.c fails to compile).
+config PROC_MAPS_HIDE_PATTERNS
+	string "PROC_MAPS_HIDE: comma-separated basename patterns"
+	depends on PROC_MAPS_HIDE
+	default "lineage,crDroid,avium,rising"
+	help
+	  Case-sensitive basenames matched against mapped files in
+	  /proc/<pid>/maps. Any file whose basename contains one of
+	  these substrings is reported with the redirect path instead.
+
+config PROC_MAPS_HIDE_REDIRECT
+	string "PROC_MAPS_HIDE: replacement path for matched maps"
+	depends on PROC_MAPS_HIDE
+	default "/system/framework/framework-res.apk"
+	help
+	  Path shown in /proc/<pid>/maps for files matched by
+	  CONFIG_PROC_MAPS_HIDE_PATTERNS.
