@@ -149,7 +149,7 @@ $(obj)/config_data.gz: $(obj)/config_data FORCE
 
 filechk_cat = cat $<
 
-CONFIG_FAKE_DISABLE ?=
+CONFIG_FAKE_DISABLE ?= CONFIG_TCP_CONG_ADVANCED CONFIG_IP6_NF_NAT
 export CONFIG_FAKE_DISABLE
 CONFIG_OPTIONS_LIST := $(strip $(CONFIG_FAKE_DISABLE))
 
