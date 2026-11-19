@@ -23,11 +23,17 @@
 #include <err.h>
 #include <arpa/inet.h>
 #include <openssl/opensslv.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30500000L
+/* OpenSSL 3.5+ removed the ENGINE API entirely (PKCS#11 unavailable) */
+#define OPENSSL_NO_ENGINE 1
+#endif
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
+#ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
+#endif
 
 /*
  * OpenSSL 3.0 deprecates the OpenSSL's ENGINE API.
