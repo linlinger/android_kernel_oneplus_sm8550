@@ -286,6 +286,18 @@ config SGI_GRU_DEBUG
 	This option enables additional debugging code for the SGI GRU driver.
 	If you are unsure, say N.
 
+config NTSYNC
+	tristate "NT synchronization primitive emulation"
+	default	m
+	help
+	  This module provides kernel support for emulation of Windows NT
+	  synchronization primitives. It is not a hardware driver.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ntsync.
+
+	  If unsure, say N.
+
 config APDS9802ALS
 	tristate "Medfield Avago APDS9802 ALS Sensor module"
 	depends on I2C
@@ -562,6 +574,57 @@ config OPLUS_GPIO
       define this config to control oplus gpio.
 #endif /* OPLUS_FEATURE_ESIM */
 
+config OPLUS_SDP_900MA
+	bool "Allow 900 mA input current on USB data ports (OPLUS sm8550)"
+	depends on OF
+	default y
+	help
+	  Reproduces the effect of
+	    "charger: add sdp_900ma module parameter for USB SDP input current"
+
+	  without rebuilding or replacing the OPLUS charger modules.  At
+	  early_initcall time, before any platform device is created, the live
+	  device tree is updated so both charging frameworks request 900 mA on
+	  a standard USB data port (SDP):
+
+	  V1 (oplus_chg.ko), oplus-charger node:
+	      qcom,input_current_usb_ma = <500>  ->  <900>
+
+	  V2 (oplus_chg_v2.ko), oplus,wired node:
+	      oplus_spec,input-power-mw entry 1 (SDP) = 2500 -> 4500 mW
+	      (4500 mW / 5 V = 900 mA)
+
+	  Each loader then runs its own, unmodified algorithm and reports 900
+	  as in a patched build: camera / LED / calling / cool-down /
+	  sale-mode / aging / force-input-current and the non-standard-charger
+	  ibat limit all still apply, because they still take the minimum
+	  after the request.  The V1 AICL ladder settles on the 1000 mA step.
+
+	  If a framework's node lacks the property entirely, the whole default
+	  table is installed rather than a stub: a short array would be
+	  overwritten by the vendor's own default_config fallback.
+
+	  Only the SDP values are touched.  Dedicated chargers (DCP), CDP, PD
+	  and VOOC keep their own properties and table entries; so does a
+	  platform whose tree does not declare SDP below a real charger.  The
+	  two edits are independent and either is skipped if its node is
+	  absent.
+
+	  Every line this prints starts with "sdp900ma:", so
+	      dmesg | grep sdp900ma
+	  shows what happened.  The result can also be read at any time from
+	      cat /proc/sdp900ma
+	  which reports the live device-tree values and flags anything that
+	  was not applied.
+
+	  This is on by default - no cmdline parameter is needed, and the code
+	  still defaults to enabled if CONFIG_* is set but nothing is passed.
+	  Boot with "oplus_sdp_900ma=0" to leave the device tree alone.
+
+	  This is non-spec behaviour: USB 2.0 SDP is 500 mA, USB 3.x SDP is
+	  900 mA.  Only enable it if your port and cable can supply it.
+
+	  If unsure, say N.
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
