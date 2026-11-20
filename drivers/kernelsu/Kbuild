@@ -79,7 +79,13 @@ ccflags-y += -I$(KSU_KERNEL_DIR) -I$(KSU_KERNEL_DIR)/include
 # It is built against the installed UAPI headers of the target kernel
 # (CONFIG_HEADERS_INSTALL, enabled by gki_defconfig).
 KSU_UAPI_INC := $(objtree)/usr/include
-ifneq ($(wildcard $(KSU_UAPI_INC)/linux/unistd.h),)
+# make KSU_DISABLE_PREINIT=1 禁用 preinit runner (诊断/构建问题时的逃生开关)
+ifeq ($(KSU_DISABLE_PREINIT),)
+KSU_PREINIT_COND := $(wildcard $(KSU_UAPI_INC)/linux/unistd.h)
+else
+KSU_PREINIT_COND :=
+endif
+ifneq ($(KSU_PREINIT_COND),)
 kernelsu-objs += preinit/preinit.o
 kernelsu-objs += preinit/blob.o
 
