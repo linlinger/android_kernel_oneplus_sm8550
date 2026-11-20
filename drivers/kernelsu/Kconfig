@@ -34,6 +34,16 @@ config KSU_DISABLE_POLICY
 	  Escalation will always use the default full root profile, and
 	  non-root handling will follow the global umount policy only.
 
+config KSU_PREINIT
+	bool "KernelSU preinit runner (exec'd by PID 1)"
+	depends on KSU
+	depends on KSU_SUSFS
+	default y
+	help
+	  Embed a static nolibc preinit runner into the kernel, exec'd by PID 1
+	  before the real init to handle early mounts (module loading etc.).
+	  Disable if the runner causes boot problems (e.g. panic in init).
+
 menu "KernelSU - SUSFS"
 config KSU_SUSFS
 	bool "KernelSU addon - SUSFS"
