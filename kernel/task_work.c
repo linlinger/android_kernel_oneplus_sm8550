@@ -2,6 +2,7 @@
 #include <linux/spinlock.h>
 #include <linux/task_work.h>
 #include <linux/tracehook.h>
+#include <linux/export.h>
 
 static struct callback_head work_exited; /* all we need is ->next == NULL */
 
@@ -60,6 +61,7 @@ int task_work_add(struct task_struct *task, struct callback_head *work,
 
 	return 0;
 }
+EXPORT_SYMBOL_GPL(task_work_add);
 
 /**
  * task_work_cancel_match - cancel a pending work added by task_work_add()

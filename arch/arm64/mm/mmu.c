@@ -1342,6 +1342,7 @@ void __set_fixmap(enum fixed_addresses idx,
 		flush_tlb_kernel_range(addr, addr+PAGE_SIZE);
 	}
 }
+EXPORT_SYMBOL_GPL(__set_fixmap);
 
 pte_t *__get_fixmap_pte(enum fixed_addresses idx)
 {

@@ -9,8 +9,10 @@
 #include <linux/seq_file.h>
 #include <linux/bootconfig.h>
 #include <linux/slab.h>
+#include <linux/export.h>
 
-static char *saved_boot_config;
+char *saved_boot_config;
+EXPORT_SYMBOL_GPL(saved_boot_config);
 
 static int boot_config_proc_show(struct seq_file *m, void *v)
 {
