@@ -5,7 +5,21 @@ kernelsu-objs += feature/module_blacklist.o
 kernelsu-objs += feature/sulog.o
 kernelsu-objs += feature/sucompat.o
 
+kernelsu-objs += hook/lsm_hook.o
 kernelsu-objs += hook/setuid_hook.o
+kernelsu-objs += hook/syscall_event_bridge.o
+kernelsu-objs += hook/syscall_hook_manager.o
+kernelsu-objs += hook/tp_marker.o
+ifeq ($(CONFIG_ARM64),y)
+kernelsu-objs += hook/arm64/patch_memory.o
+kernelsu-objs += hook/arm64/syscall_hook.o
+else ifeq ($(CONFIG_X86_64),y)
+kernelsu-objs += hook/x86_64/patch_memory.o
+kernelsu-objs += hook/x86_64/syscall_hook.o
+else ifeq ($(CONFIG_RISCV),y)
+kernelsu-objs += hook/riscv64/patch_memory.o
+kernelsu-objs += hook/riscv64/syscall_hook.o
+endif
 kernelsu-objs += extras.o
 
 kernelsu-objs += infra/file_wrapper.o
@@ -55,6 +69,9 @@ endif
 ifeq ($(CONFIG_KSU_DEBUG),y)
 ccflags-y += -DCONFIG_KSU_DEBUG=1
 endif
+ifeq ($(CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER),y)
+ccflags-y += -DCONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=1
+endif
 endif
 
 ccflags-y += -I$(srctree)/security/selinux -I$(srctree)/security/selinux/include
@@ -79,13 +96,9 @@ ccflags-y += -I$(KSU_KERNEL_DIR) -I$(KSU_KERNEL_DIR)/include
 # It is built against the installed UAPI headers of the target kernel
 # (CONFIG_HEADERS_INSTALL, enabled by gki_defconfig).
 KSU_UAPI_INC := $(objtree)/usr/include
-# preinit 由 CONFIG_KSU_PREINIT 控制; make KSU_DISABLE_PREINIT=1 可强制覆盖(诊断用)
-ifeq ($(CONFIG_KSU_PREINIT)$(KSU_DISABLE_PREINIT),y)
-KSU_PREINIT_COND := $(wildcard $(KSU_UAPI_INC)/linux/unistd.h)
-else
-KSU_PREINIT_COND :=
-endif
-ifneq ($(KSU_PREINIT_COND),)
+# preinit runner (被 PID 1 exec) 在本设备实测导致 bootloop, 默认关闭 (CONFIG_KSU_PREINIT)
+KSU_PREINIT_HDR := $(if $(filter y,$(CONFIG_KSU_PREINIT)),$(wildcard $(KSU_UAPI_INC)/linux/unistd.h),)
+ifneq ($(KSU_PREINIT_HDR),)
 kernelsu-objs += preinit/preinit.o
 kernelsu-objs += preinit/blob.o
 
@@ -196,15 +209,5 @@ ccflags-y += -DKSU_NEW_DCACHE_FLUSH=$(KSU_NEW_DCACHE_FLUSH)
 
 ccflags-y += -Wno-strict-prototypes -Wno-int-conversion -Wno-gcc-compat -Wno-missing-prototypes -Wno-missing-declarations
 ccflags-y += -Wno-declaration-after-statement -Wno-unused-function -Wno-unused-variable
-
-## For susfs stuff ##
-ifeq ($(shell test -e $(srctree)/fs/susfs.c; echo $$?),0)
-$(eval SUSFS_VERSION=$(shell cat $(srctree)/include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g'))
-$(info )
-$(info -- SUSFS_VERSION: $(SUSFS_VERSION))
-else
-$(info -- You have not integrated susfs in your kernel yet.)
-$(info -- Read: https://gitlab.com/simonpunk/susfs4ksu)
-endif
 
 # Keep a new line here!! Because someone may append config

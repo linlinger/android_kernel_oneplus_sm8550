@@ -21,7 +21,6 @@ bool ksu_preinit_enabled_param(void);
 #else
 static inline void ksu_preinit_init(void)
 {
-    pr_info("ksu_preinit_init: KSU_NO_PREINIT flag is defined\n");
 }
 static inline void ksu_preinit_exit(void)
 {
@@ -30,16 +29,13 @@ static inline bool ksu_preinit_handle_execve(const char __user **filename_user,
                                              const char __user *const __user *argv_user, int orig_nr,
                                              struct pt_regs *regs, long *ret)
 {
-    pr_info("ksu_preinit_handle_execve: KSU_NO_PREINIT flag is defined\n");
     return false;
 }
 static inline void ksu_preinit_release(void)
 {
-    pr_info("ksu_preinit_release: KSU_NO_PREINIT flag is defined\n");
 }
 static inline bool ksu_preinit_enabled_param(void)
 {
-    pr_info("ksu_preinit_enabled_param: KSU_NO_PREINIT flag is defined\n");
     return false;
 }
 #endif

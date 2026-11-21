@@ -26,5 +26,4 @@ bool ksu_is_su_session_fd(const struct file *filp);
 
 void ksu_supercalls_init(void);
 void ksu_supercalls_exit(void);
-int ksu_supercall_reboot_handler(void __user **arg);
 #endif // __KSU_H_SUPERCALL
