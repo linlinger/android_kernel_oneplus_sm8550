@@ -18,17 +18,6 @@ config KSU_DEBUG
 	help
 	  Enable KernelSU debug mode.
 
-config KSU_PREINIT
-	bool "KernelSU preinit runner (exec'd by PID 1)"
-	depends on KSU && HEADERS_INSTALL
-	default n
-	help
-	  Embed a static nolibc preinit runner into the kernel, exec'd by PID 1
-	  before the real init. On this device (OnePlus Ace 2 Pro, Android 17)
-	  it was observed to cause an early-boot crash loop, so it defaults to
-	  off; KSU works without it (boot hooks are handled by the rc injection
-	  and syscall hooks).
-
 config KSU_DISABLE_MANAGER
 	bool "Disable KernelSU manager integration"
 	depends on KSU
@@ -45,6 +34,17 @@ config KSU_DISABLE_POLICY
 	  Disable per-app root/non-root profile customization.
 	  Escalation will always use the default full root profile, and
 	  non-root handling will follow the global umount policy only.
+
+config KSU_PREINIT
+	bool "KernelSU preinit runner (exec'd by PID 1)"
+	depends on KSU && HEADERS_INSTALL
+	default n
+	help
+	  Embed a static nolibc preinit runner into the kernel, exec'd by PID 1
+	  before the real init. On this device (OnePlus Ace 2 Pro, Android 17)
+	  it was observed to cause an early-boot crash loop, so it defaults to
+	  off; KSU works without it (boot hooks are handled by the rc injection
+	  and syscall hooks).
 
 config KSU_X86_PATCH_SYSCALL_DISPATCHER
 	bool "Dynamically patch x64's hardened syscall dispatcher to support syscall hooks"
